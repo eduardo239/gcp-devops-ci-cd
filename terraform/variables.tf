@@ -8,11 +8,16 @@ variable "region" {
   type        = string
   default     = "us-central1"
 }
-
-
-
 variable "zone" {
   description = "The zone where the Google Compute Engine instance will be created."
   type        = string
   default     = "us-central1-a"
+}
+variable "services" {
+  description = "List of Google Cloud services to enable for the project."
+  type        = list(string)
+  default = [
+    "compute.googleapis.com",
+    "storage.googleapis.com"
+  ]
 }

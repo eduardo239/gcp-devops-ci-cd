@@ -1,11 +1,7 @@
-resource "google_project_services" "project_services" {
-  project = var.project_id
-  services = [
-    "compute.googleapis.com",
-    "storage.googleapis.com",
-    "iam.googleapis.com"
-    # Adicione outras APIs que seu projeto precisar
-  ]
+resource "google_project_service" "project_services" {
+  for_each           = toset(var.services)
+  project            = var.project_id
+  service            = each.value
   disable_on_destroy = false
 }
 
