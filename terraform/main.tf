@@ -46,3 +46,21 @@ resource "google_storage_bucket" "bucket" {
     prevent_destroy = false
   }
 }
+
+module "vpc" {
+  source                   = "../modules/vpc"
+  network_name             = var.vpc_name
+  routing_mode             = "REGIONAL"
+  region                   = var.region
+  private_ip_google_access = true
+  subnets = [
+    {
+      name          = "subnet-1"
+      ip_cidr_range = "10.0.1.0/24"
+    },
+    {
+      name          = "subnet-2"
+      ip_cidr_range = "10.0.2.0/24"
+    }
+  ]
+}

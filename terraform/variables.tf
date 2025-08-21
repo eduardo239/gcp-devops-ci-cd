@@ -22,3 +22,9 @@ variable "services" {
     "cloudresourcemanager.googleapis.com"
   ]
 }
+variable "vpc_name" {
+  description = "The name of the VPC network to create."
+  type        = string
+  default     = "tf-vpc-network"
+
+}
