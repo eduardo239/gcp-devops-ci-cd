@@ -6,8 +6,10 @@ resource "google_project_service" "project_services" {
 }
 
 resource "random_string" "suffix" {
-  length  = 8
+  length  = 6
   special = false
+  upper   = false
+
 }
 
 resource "google_compute_instance" "vm_instance" {
