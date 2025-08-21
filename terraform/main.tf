@@ -49,7 +49,6 @@ resource "google_storage_bucket" "bucket" {
 
 module "vpc" {
   source                   = "../modules/vpc"
-  network_name             = var.vpc_name
   routing_mode             = "REGIONAL"
   region                   = var.region
   private_ip_google_access = true
