@@ -5,7 +5,7 @@ resource "google_compute_network" "vpc_network" {
   routing_mode            = var.routing_mode
 
   lifecycle {
-    prevent_destroy = true
+    # prevent_destroy = true
   }
 }
 
