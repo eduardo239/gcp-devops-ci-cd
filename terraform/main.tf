@@ -11,7 +11,7 @@ resource "random_string" "random_name" {
 }
 
 resource "google_compute_instance" "vm_instance" {
-  name         = "vm-instance-${random_string.random_name.result}"
+  name         = "vm-instance-1"
   project      = var.project_id
   machine_type = "e2-micro"
   zone         = var.zone
