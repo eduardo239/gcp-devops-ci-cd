@@ -18,11 +18,12 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      # - name: Set GOOGLE_CREDENTIALS environment variable for Terraform
-      #   run: echo "GOOGLE_CREDENTIALS =${{ secrets.GCP_CREDENTIALS }}" >> $GITHUB_ENV
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: terraform/
+        run: terraform init
 
       - name: Terraform Destroy
         working-directory: terraform/
