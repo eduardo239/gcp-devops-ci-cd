@@ -1,11 +1,11 @@
-resource "google_project_service" "project_services" {
+resource "google_project_services" "project_services" {
   project = var.project_id
-  service = [
+  services = [
     "compute.googleapis.com",
     "storage.googleapis.com",
     "iam.googleapis.com"
+    # Adicione outras APIs que seu projeto precisar
   ]
-
   disable_on_destroy = false
 }
 
