@@ -5,7 +5,7 @@ resource "google_project_service" "project_services" {
   disable_on_destroy = false
 }
 
-resource "random_string" "random_name" {
+resource "random_string" "suffix" {
   length  = 8
   special = false
 }
@@ -26,5 +26,21 @@ resource "google_compute_instance" "vm_instance" {
     network = "default"
     access_config {}
   }
+}
 
+
+resource "google_storage_bucket" "bucket" {
+  name          = "tf-bucket-${random_string.suffix.result}"
+  location      = var.region
+  force_destroy = true
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }
