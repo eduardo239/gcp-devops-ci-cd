@@ -1,3 +1,14 @@
+resource "google_project_service" "project_services" {
+  project = var.project_id
+  service = [
+    "compute.googleapis.com",
+    "storage.googleapis.com",
+    "iam.googleapis.com"
+  ]
+
+  disable_on_destroy = false
+}
+
 resource "random_string" "random_name" {
   length  = 8
   special = false
