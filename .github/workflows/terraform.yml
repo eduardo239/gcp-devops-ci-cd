@@ -1,0 +1,92 @@
+name: "Terraform CI/CD"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  TF_WORKING_DIR: "terraform"
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write" # Required for GCP Workload Identity Federation
+      pull-requests: "write" # Required to post plan comments on PRs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0 # Or your desired version
+
+      - name: Terraform Init
+        id: init
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -no-color -out=tfplan
+        continue-on-error: true # To allow plan reporting on PRs even if it fails
+
+      - name: Create Plan Output
+        id: plan-output
+        run: |
+          PLAN_OUTPUT=$(terraform -chdir=${{ env.TF_WORKING_DIR }} show -no-color tfplan)
+          echo "plan_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$PLAN_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post Plan as PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📖
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform
+            ${{ steps.plan-output.outputs.plan_output }}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve tfplan
